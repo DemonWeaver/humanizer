@@ -73,13 +73,17 @@ struct MainView: View {
     }
 
     private var settingsButton: some View {
-        Button {
-            showSettings()
+        Menu {
+            Button("Settings…") { showSettings() }
+            Button("Check for Updates…") { AppUpdater.shared.checkForUpdates() }
+                .disabled(!AppUpdater.shared.canCheckForUpdates)
         } label: {
             Image(systemName: "gearshape")
         }
-        .buttonStyle(.borderless)
-        .help("Settings")
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help("Settings & updates")
     }
 
     private var apiKeyBanner: some View {
