@@ -3,32 +3,29 @@ import UserNotifications
 
 @main
 struct HumanizerApp: App {
-    @StateObject private var appState = AppState()
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        MenuBarExtra {
-            MainView()
-                .environmentObject(appState)
-                .frame(width: 440, height: 600)
-        } label: {
-            Image(nsImage: appState.isWorking ? MenuBarIcon.working : MenuBarIcon.normal)
-                .accessibilityLabel("Humanizer")
-        }
-        .menuBarExtraStyle(.window)
-
+        // The menu bar UI is an AppKit NSStatusItem (see StatusItemController)
+        // so the icon itself can accept file drops. Settings stays SwiftUI.
         Settings {
             SettingsView()
-                .environmentObject(appState)
+                .environmentObject(AppState.shared)
         }
     }
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
+    private var statusController: StatusItemController?
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         let center = UNUserNotificationCenter.current()
         center.delegate = self
         center.requestAuthorization(options: [.alert, .sound]) { _, _ in }
+
+        MainActor.assumeIsolated {
+            statusController = StatusItemController(state: AppState.shared)
+        }
     }
 
     // Show banners even while the app is active (it is a menu bar app).

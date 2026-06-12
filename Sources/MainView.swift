@@ -3,7 +3,13 @@ import UniformTypeIdentifiers
 
 struct MainView: View {
     @EnvironmentObject private var state: AppState
+    @Environment(\.openSettings) private var openSettings
     @State private var dropTargeted = false
+
+    private func showSettings() {
+        openSettings()
+        SettingsWindowFocus.bringToFront()
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -67,16 +73,13 @@ struct MainView: View {
     }
 
     private var settingsButton: some View {
-        SettingsLink {
+        Button {
+            showSettings()
+        } label: {
             Image(systemName: "gearshape")
         }
         .buttonStyle(.borderless)
         .help("Settings")
-        // SettingsLink doesn't focus an already-open Settings window in a
-        // menu bar app — force it to the front on every click.
-        .simultaneousGesture(TapGesture().onEnded {
-            SettingsWindowFocus.bringToFront()
-        })
     }
 
     private var apiKeyBanner: some View {
@@ -91,12 +94,9 @@ struct MainView: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            SettingsLink {
-                Text("Open Settings")
+            Button("Open Settings") {
+                showSettings()
             }
-            .simultaneousGesture(TapGesture().onEnded {
-                SettingsWindowFocus.bringToFront()
-            })
         }
         .padding(10)
         .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
@@ -164,6 +164,12 @@ struct MainView: View {
             }
             .disabled(state.isWorking)
             .help("Grab whatever is on the clipboard and humanize it")
+
+            Button("Open File…") {
+                state.openFilePanel()
+            }
+            .disabled(state.isWorking)
+            .help("Pick a txt, md, docx, rtf, or pdf file — you can also drop one on the menu bar icon")
 
             Spacer()
 
@@ -272,7 +278,7 @@ struct MainView: View {
             }
             guard let fileURL = url else { return }
             Task { @MainActor in
-                state.loadDroppedFile(fileURL)
+                state.loadDroppedFile(fileURL, autoRun: true)
             }
         }
         return true

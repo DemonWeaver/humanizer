@@ -5,6 +5,8 @@ import UniformTypeIdentifiers
 
 @MainActor
 final class AppState: ObservableObject {
+    static let shared = AppState()
+
     enum Phase: Equatable {
         case idle
         case working(String)   // status label
@@ -164,7 +166,7 @@ final class AppState: ObservableObject {
         )
     }
 
-    func loadDroppedFile(_ url: URL) {
+    func loadDroppedFile(_ url: URL, autoRun: Bool = false) {
         do {
             let text = try TextExtractor.extractText(from: url)
             inputText = text
@@ -172,8 +174,24 @@ final class AppState: ObservableObject {
             outputText = ""
             phase = .idle
             statusLine = "Loaded \(url.lastPathComponent)"
+            if autoRun && settings.hasAPIKey {
+                humanize()
+            }
         } catch {
             phase = .failed("Couldn't read \(url.lastPathComponent): \(error.localizedDescription)")
+        }
+    }
+
+    func openFilePanel() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = TextExtractor.supportedExtensions
+            .compactMap { UTType(filenameExtension: $0) }
+        panel.prompt = "Humanize"
+        if panel.runModal() == .OK, let url = panel.url {
+            loadDroppedFile(url, autoRun: true)
         }
     }
 
