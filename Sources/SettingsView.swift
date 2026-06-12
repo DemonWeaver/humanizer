@@ -28,6 +28,7 @@ struct GeneralSettingsView: View {
     @EnvironmentObject private var state: AppState
     @State private var apiKeyField = ""
     @State private var keySaved = false
+    @State private var importError: String?
 
     var body: some View {
         Form {
@@ -61,6 +62,34 @@ struct GeneralSettingsView: View {
                 }
             }
 
+            Section("Notification sounds") {
+                soundRow(
+                    label: "Rewrite finished",
+                    selection: Binding(
+                        get: { state.settings.rewriteDoneSound },
+                        set: { state.settings.rewriteDoneSound = $0 }
+                    )
+                )
+                soundRow(
+                    label: "File saved",
+                    selection: Binding(
+                        get: { state.settings.fileSavedSound },
+                        set: { state.settings.fileSavedSound = $0 }
+                    )
+                )
+                HStack {
+                    Button("Add Custom Sound…") { importCustomSound() }
+                    Text("Any audio file (mp3, m4a, wav…) — converted and trimmed to 29 s automatically.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                if let importError {
+                    Text(importError)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            }
+
             Section("Saved documents") {
                 HStack {
                     Text(state.settings.outputFolderDisplayPath.isEmpty
@@ -84,6 +113,50 @@ struct GeneralSettingsView: View {
         .formStyle(.grouped)
         .onAppear {
             if let key = state.settings.apiKey { apiKeyField = key }
+        }
+    }
+
+    private func soundRow(label: String, selection: Binding<String>) -> some View {
+        HStack {
+            Picker(label, selection: selection) {
+                Text("None").tag("None")
+                Text("Default").tag("Default")
+                Divider()
+                ForEach(SoundLibrary.systemSounds, id: \.self) { name in
+                    Text(name).tag(name)
+                }
+                if !state.sounds.customSounds.isEmpty {
+                    Divider()
+                    ForEach(state.sounds.customSounds, id: \.self) { file in
+                        Text(file.replacingOccurrences(of: ".wav", with: "") + " (custom)").tag(file)
+                    }
+                }
+            }
+            Button {
+                state.sounds.preview(selection.wrappedValue)
+            } label: {
+                Image(systemName: "speaker.wave.2")
+            }
+            .buttonStyle(.borderless)
+            .help("Preview")
+            .disabled(selection.wrappedValue == "None")
+        }
+    }
+
+    private func importCustomSound() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = [.audio]
+        panel.prompt = "Import Sound"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            let imported = try state.sounds.importSound(from: url)
+            importError = nil
+            state.sounds.preview(imported)
+        } catch {
+            importError = error.localizedDescription
         }
     }
 

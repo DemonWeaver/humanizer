@@ -17,6 +17,7 @@ final class AppSettings: ObservableObject {
         ("claude-haiku-4-5", "Claude Haiku 4.5 — cheapest"),
     ]
 
+
     @Published var model: String {
         didSet { defaults.set(model, forKey: "model") }
     }
@@ -34,8 +35,18 @@ final class AppSettings: ObservableObject {
     /// Cached so views don't hit the Keychain on every render.
     @Published private(set) var hasAPIKey: Bool
 
+    @Published var rewriteDoneSound: String {
+        didSet { defaults.set(rewriteDoneSound, forKey: "rewriteDoneSound") }
+    }
+
+    @Published var fileSavedSound: String {
+        didSet { defaults.set(fileSavedSound, forKey: "fileSavedSound") }
+    }
+
     init() {
         self.model = defaults.string(forKey: "model") ?? "claude-opus-4-8"
+        self.rewriteDoneSound = defaults.string(forKey: "rewriteDoneSound") ?? "Default"
+        self.fileSavedSound = defaults.string(forKey: "fileSavedSound") ?? "Glass"
         if let data = defaults.data(forKey: "profiles"),
            let decoded = try? JSONDecoder().decode([CustomProfile].self, from: data) {
             self.profiles = decoded

@@ -22,6 +22,7 @@ final class AppState: ObservableObject {
 
     let settings = AppSettings()
     let styleStore = StyleProfileStore()
+    let sounds = SoundLibrary()
     private let client = AnthropicClient()
 
     /// Conversation history for the current humanize session (iterative refinement).
@@ -35,6 +36,9 @@ final class AppState: ObservableObject {
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
         styleStore.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+        sounds.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
     }
@@ -153,7 +157,11 @@ final class AppState: ObservableObject {
         pb.clearContents()
         pb.setString(outputText, forType: .string)
         statusLine = "Copied to clipboard ✓"
-        Notifier.notify(title: "Humanizer", body: "Output copied to clipboard.")
+        Notifier.notify(
+            title: "Humanizer",
+            body: "Output copied to clipboard.",
+            sound: sounds.resolveForNotification(settings.rewriteDoneSound)
+        )
     }
 
     func loadDroppedFile(_ url: URL) {
@@ -194,7 +202,11 @@ final class AppState: ObservableObject {
             do {
                 try outputText.write(to: dest, atomically: true, encoding: .utf8)
                 statusLine = "Saved \(dest.lastPathComponent) ✓"
-                Notifier.notify(title: "Humanizer", body: "Saved \(dest.lastPathComponent) to \(folder.lastPathComponent).")
+                Notifier.notify(
+                    title: "Humanizer",
+                    body: "Saved \(dest.lastPathComponent) to \(folder.lastPathComponent).",
+                    sound: sounds.resolveForNotification(settings.fileSavedSound)
+                )
             } catch {
                 phase = .failed("Couldn't save file: \(error.localizedDescription)")
             }
@@ -207,7 +219,11 @@ final class AppState: ObservableObject {
                 do {
                     try outputText.write(to: url, atomically: true, encoding: .utf8)
                     statusLine = "Saved \(url.lastPathComponent) ✓"
-                    Notifier.notify(title: "Humanizer", body: "Saved \(url.lastPathComponent).")
+                    Notifier.notify(
+                        title: "Humanizer",
+                        body: "Saved \(url.lastPathComponent).",
+                        sound: sounds.resolveForNotification(settings.fileSavedSound)
+                    )
                 } catch {
                     phase = .failed("Couldn't save file: \(error.localizedDescription)")
                 }
@@ -257,7 +273,11 @@ final class AppState: ObservableObject {
                 styleStore.styleProfile = updated.trimmingCharacters(in: .whitespacesAndNewlines)
                 phase = .done
                 statusLine = "Style profile updated ✓"
-                Notifier.notify(title: "Humanizer", body: "Your style profile was updated from this session's feedback.")
+                Notifier.notify(
+                    title: "Humanizer",
+                    body: "Your style profile was updated from this session's feedback.",
+                    sound: sounds.resolveForNotification(settings.rewriteDoneSound)
+                )
             } catch {
                 guard !Task.isCancelled else { return }
                 phase = .failed("Profile update failed: \(error.localizedDescription)")
