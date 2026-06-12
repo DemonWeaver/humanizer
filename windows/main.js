@@ -10,6 +10,7 @@ const store = require("./lib/store");
 const { systemBlocks, profileUpdaterInstructions } = require("./lib/prompt");
 const { streamMessage } = require("./lib/anthropic");
 const { extractText, SUPPORTED } = require("./lib/extract");
+const { initAutoUpdate } = require("./lib/updater");
 
 // Single instance — clicking the installer/shortcut again just shows the window.
 if (!app.requestSingleInstanceLock()) {
@@ -28,6 +29,10 @@ app.whenReady().then(() => {
   createTray();
   // Tray app — no dock/taskbar presence.
   if (process.platform === "darwin" && app.dock) app.dock.hide();
+  // Auto-update only in packaged builds (dev runs have no app-update.yml).
+  if (app.isPackaged) {
+    try { initAutoUpdate(); } catch (e) { console.log("updater init failed:", e.message); }
+  }
 });
 
 app.on("window-all-closed", (e) => e.preventDefault()); // stay alive in tray

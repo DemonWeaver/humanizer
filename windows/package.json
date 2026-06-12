@@ -1,7 +1,7 @@
 {
   "name": "humanizer",
   "productName": "Humanizer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Rewrite AI-sounding text to sound human — Windows tray app",
   "author": "DemonWeaver",
   "license": "MIT",
@@ -16,6 +16,9 @@
     "appId": "com.brandon.humanizer",
     "productName": "Humanizer",
     "directories": { "output": "dist" },
+    "publish": [
+      { "provider": "github", "owner": "DemonWeaver", "repo": "humanizer", "releaseType": "release" }
+    ],
     "files": [
       "main.js",
       "preload.js",
@@ -39,6 +42,7 @@
     }
   },
   "dependencies": {
+    "electron-updater": "^6.3.9",
     "mammoth": "^1.8.0",
     "pdf-parse": "^1.1.1"
   },
