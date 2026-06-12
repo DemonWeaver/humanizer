@@ -132,6 +132,15 @@ function wire() {
 
   for (const a of document.querySelectorAll("a")) a.onclick = (e) => { e.preventDefault(); window.api.openExternal(a.href); };
 
+  // Settings tabs
+  document.querySelectorAll(".tab").forEach((tab) => {
+    tab.onclick = () => {
+      document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t === tab));
+      const name = tab.dataset.tab;
+      document.querySelectorAll(".tab-panel").forEach((p) => p.classList.toggle("hidden", p.dataset.panel !== name));
+    };
+  });
+
   setupDrop();
 }
 

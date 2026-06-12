@@ -77,7 +77,14 @@
         <strong>Settings</strong>
         <button id="settingsClose" class="icon">×</button>
       </div>
-      <div class="modal-body">
+      <div class="tabs">
+        <button class="tab active" data-tab="general">General</button>
+        <button class="tab" data-tab="profiles">Profiles</button>
+        <button class="tab" data-tab="style">Voice &amp; Style</button>
+      </div>
+
+      <!-- General -->
+      <div class="tab-panel" data-panel="general">
         <label>Anthropic API key</label>
         <div class="row">
           <input id="apiKey" type="password" placeholder="sk-ant-…" />
@@ -112,16 +119,24 @@
           <button id="importSoundBtn">Add Custom Sound…</button>
           <span class="muted small">mp3, wav, ogg, m4a…</span>
         </div>
+      </div>
 
-        <label>Profiles</label>
+      <!-- Profiles -->
+      <div class="tab-panel hidden" data-panel="profiles">
+        <div class="muted small">Profiles are custom prompts sent along with a rewrite — e.g. “Cover letter mode: confident, first person, no buzzwords.” Pick the active one from the dropdown in the main window.</div>
         <div id="profileList"></div>
         <div class="row"><button id="addProfileBtn">+ Add profile</button></div>
+      </div>
 
+      <!-- Voice & Style -->
+      <div class="tab-panel hidden" data-panel="style">
         <label>Voice calibration sample</label>
-        <textarea id="voiceSample" class="settings-text" placeholder="Paste 2–3 paragraphs of your own writing…"></textarea>
+        <div class="muted small">Paste 2–3 paragraphs of your own writing. Rewrites match its rhythm and word choice instead of a generic voice.</div>
+        <textarea id="voiceSample" class="settings-text grow" placeholder="Paste 2–3 paragraphs of your own writing…"></textarea>
 
         <label>Learned style profile</label>
-        <textarea id="styleProfile" class="settings-text" placeholder="Built from your “Teach My Style” feedback. Editable."></textarea>
+        <div class="muted small">Built automatically from your “Teach My Style” feedback. You can edit it directly.</div>
+        <textarea id="styleProfile" class="settings-text grow" placeholder="Built from your “Teach My Style” feedback. Editable."></textarea>
       </div>
     </div>
   </div>
