@@ -1,0 +1,117 @@
+:root {
+  --bg: #f4f4f6;
+  --card: #ffffff;
+  --text: #1c1c20;
+  --muted: #6b6b76;
+  --border: #e0e0e6;
+  --field: #ffffff;
+  --accent: #b8388f;
+  --accent2: #6a32c8;
+  --danger: #c0392b;
+  --ok: #1e8e4a;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1e1e22; --card: #2a2a30; --text: #ececf0; --muted: #9a9aa6;
+    --border: #3a3a42; --field: #232328; --ok: #4cd07d;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  font: 13px -apple-system, "Segoe UI", system-ui, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  user-select: none;
+}
+#app { display: flex; flex-direction: column; height: 100vh; padding: 12px; gap: 8px; }
+
+header { display: flex; align-items: center; gap: 8px; }
+.brand { font-weight: 600; font-size: 14px; }
+.logo {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.icon {
+  background: none; border: none; color: var(--muted); font-size: 16px;
+  cursor: pointer; padding: 2px 6px; border-radius: 6px;
+}
+.icon:hover { background: var(--border); }
+
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field.grow { flex: 1; min-height: 0; }
+.field-head { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: var(--muted); }
+textarea, input[type=text], input[type=password], select {
+  font: inherit; color: var(--text); background: var(--field);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px;
+  outline: none; user-select: text;
+}
+textarea { resize: none; }
+#input { height: 96px; }
+#output { flex: 1; min-height: 90px; }
+.field.grow #output { height: 100%; }
+input:focus, textarea:focus, select:focus { border-color: var(--accent2); }
+
+.row { display: flex; align-items: center; gap: 8px; }
+.row > input[type=text] { flex: 1; }
+.spacer { flex: 1; }
+
+button {
+  font: inherit; cursor: pointer; padding: 6px 12px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--card); color: var(--text);
+}
+button:hover { border-color: var(--muted); }
+button:disabled { opacity: 0.45; cursor: default; }
+button.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; border: none; font-weight: 600;
+}
+button.link { border: none; background: none; color: var(--muted); }
+.muted { color: var(--muted); }
+.small { font-size: 11px; }
+
+.banner {
+  display: flex; align-items: center; gap: 10px;
+  background: color-mix(in srgb, #e8a13a 18%, transparent);
+  border-radius: 8px; padding: 10px;
+}
+.banner button { margin-left: auto; }
+
+.spinner {
+  width: 14px; height: 14px; border: 2px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error { color: var(--danger); font-size: 12px; }
+.ok { color: var(--ok); }
+.hidden { display: none !important; }
+
+.drop-overlay {
+  position: fixed; inset: 8px; border: 3px dashed var(--accent2); border-radius: 14px;
+  background: color-mix(in srgb, var(--accent2) 10%, transparent);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; pointer-events: none; z-index: 50;
+}
+
+.modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+}
+.modal-card {
+  background: var(--bg); width: 92%; max-height: 90%; border-radius: 12px;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.modal-head { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); }
+.modal-head strong { flex: 1; }
+.modal-body { padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.modal-body label { font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 8px; }
+.settings-text { height: 80px; }
+.sound-label { width: 110px; font-size: 12px; }
+.preview { padding: 4px 8px; }
+
+.profile-item { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border); border-radius: 8px; padding: 8px; margin-bottom: 6px; }
+.profile-item .row { gap: 6px; }
+.profile-item textarea { height: 54px; }

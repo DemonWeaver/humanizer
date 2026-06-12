@@ -4,6 +4,10 @@ A menu bar app that rewrites AI-sounding text to sound human, powered by the
 [blader/humanizer](https://github.com/blader/humanizer) skill running on the
 Claude API.
 
+> **On Windows?** There's a native tray app with the same features — see
+> [`windows/`](windows/) and grab `Humanizer-Setup-x.y.z.exe` from
+> [Releases](https://github.com/DemonWeaver/humanizer/releases).
+
 ## Features
 
 - **Menu bar popover** — paste text, or click "Humanize Clipboard" (⌘↩ to run).

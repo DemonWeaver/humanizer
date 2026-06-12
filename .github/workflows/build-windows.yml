@@ -1,0 +1,47 @@
+name: Build Windows installer
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: windows
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Keep the bundled skill in sync with the repo copy.
+      - name: Sync SKILL.md
+        run: copy ..\Resources\SKILL.md assets\SKILL.md
+        shell: cmd
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate icons
+        run: npm run make-icons
+
+      - name: Build installer
+        run: npx electron-builder --win --x64 --publish never
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Humanizer-Windows-Setup
+          path: windows/dist/*.exe
+
+      - name: Attach installer to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: windows/dist/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

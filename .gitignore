@@ -14,3 +14,12 @@ Humanizer.xcodeproj/
 dist/
 build-release/
 build-diagnostic/
+
+# Electron (Windows app)
+windows/node_modules/
+windows/dist/
+windows/assets/icon.svg
+windows/assets/icon.png
+windows/assets/icon.ico
+windows/assets/tray.png
+windows/assets/tray@2x.png

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; media-src 'self' file:; style-src 'self' 'unsafe-inline';" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Humanizer</title>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header>
+      <div class="brand"><span class="logo">✶</span> Humanizer</div>
+      <div class="header-right">
+        <select id="profile" title="Profiles add extra instructions to the rewrite"></select>
+        <button id="settingsBtn" class="icon" title="Settings">⚙</button>
+        <button id="quitBtn" class="icon" title="Close window">×</button>
+      </div>
+    </header>
+
+    <!-- API key banner -->
+    <div id="keyBanner" class="banner hidden">
+      <div>
+        <strong>Add your Anthropic API key to get started</strong>
+        <div class="muted small">console.anthropic.com → API keys, then paste it in Settings.</div>
+      </div>
+      <button id="bannerSettings">Open Settings</button>
+    </div>
+
+    <!-- Main -->
+    <section class="field">
+      <div class="field-head">
+        <span>Input</span>
+        <span id="inputMeta" class="muted small"></span>
+      </div>
+      <textarea id="input" placeholder="Paste text here, or drop a file anywhere in this window…"></textarea>
+    </section>
+
+    <div class="row">
+      <button id="humanizeBtn" class="primary">✶ Humanize</button>
+      <button id="clipboardBtn">Humanize Clipboard</button>
+      <button id="openFileBtn">Open File…</button>
+      <span class="spacer"></span>
+      <span id="spinner" class="spinner hidden"></span>
+      <button id="cancelBtn" class="link hidden">Cancel</button>
+    </div>
+
+    <section class="field grow">
+      <div class="field-head">
+        <span>Output</span>
+        <span id="status" class="muted small"></span>
+      </div>
+      <textarea id="output" placeholder="The humanized text appears here and is copied to your clipboard automatically."></textarea>
+    </section>
+
+    <div class="row">
+      <input id="feedback" type="text" placeholder="Adjust the wording — e.g. “less formal, shorter sentences”" />
+      <button id="refineBtn">Refine</button>
+    </div>
+    <div class="row">
+      <button id="copyBtn">Copy</button>
+      <button id="saveBtn">Save to File</button>
+      <span class="spacer"></span>
+      <button id="teachBtn" title="Distill this session's feedback into your style profile">🎓 Teach My Style</button>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+  </div>
+
+  <!-- Drop overlay -->
+  <div id="dropOverlay" class="drop-overlay hidden">Drop a txt, md, docx, rtf, or pdf file</div>
+
+  <!-- Settings modal -->
+  <div id="settings" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <strong>Settings</strong>
+        <button id="settingsClose" class="icon">×</button>
+      </div>
+      <div class="modal-body">
+        <label>Anthropic API key</label>
+        <div class="row">
+          <input id="apiKey" type="password" placeholder="sk-ant-…" />
+          <button id="saveKeyBtn">Save</button>
+        </div>
+        <div id="keyStatus" class="muted small"></div>
+
+        <label>Model</label>
+        <select id="model">
+          <option value="claude-opus-4-8">Claude Opus 4.8 — best quality</option>
+          <option value="claude-sonnet-4-6">Claude Sonnet 4.6 — fast &amp; cheaper</option>
+          <option value="claude-haiku-4-5">Claude Haiku 4.5 — cheapest</option>
+        </select>
+
+        <label>Saved documents folder</label>
+        <div class="row">
+          <input id="outputFolder" type="text" readonly placeholder="Ask each time" />
+          <button id="chooseFolderBtn">Choose…</button>
+          <button id="clearFolderBtn">Clear</button>
+        </div>
+
+        <label>Notification sounds</label>
+        <div class="row"><span class="sound-label">Rewrite finished</span>
+          <select id="rewriteDoneSound"></select>
+          <button class="preview" data-for="rewriteDoneSound">▶</button>
+        </div>
+        <div class="row"><span class="sound-label">File saved</span>
+          <select id="fileSavedSound"></select>
+          <button class="preview" data-for="fileSavedSound">▶</button>
+        </div>
+        <div class="row">
+          <button id="importSoundBtn">Add Custom Sound…</button>
+          <span class="muted small">mp3, wav, ogg, m4a…</span>
+        </div>
+
+        <label>Profiles</label>
+        <div id="profileList"></div>
+        <div class="row"><button id="addProfileBtn">+ Add profile</button></div>
+
+        <label>Voice calibration sample</label>
+        <textarea id="voiceSample" class="settings-text" placeholder="Paste 2–3 paragraphs of your own writing…"></textarea>
+
+        <label>Learned style profile</label>
+        <textarea id="styleProfile" class="settings-text" placeholder="Built from your “Teach My Style” feedback. Editable."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <audio id="player"></audio>
+  <script src="renderer.js"></script>
+</body>
+</html>
