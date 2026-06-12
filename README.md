@@ -24,6 +24,15 @@ Claude API.
 - **Models** — Claude Opus 4.8 (default), Sonnet 4.6, or Haiku 4.5. The 8k-token
   skill prompt uses prompt caching, so repeat requests cost ~10% on that portion.
 
+## Install
+
+Download the latest `Humanizer-x.y.z.dmg` from
+[Releases](https://github.com/DemonWeaver/humanizer/releases), open it, and
+drag Humanizer to Applications. The DMG is signed and notarized — it opens
+without warnings on macOS 14+.
+
+Or build from source:
+
 ## Build & run
 
 Requires Xcode 16+ and [xcodegen](https://github.com/yonaskolb/XcodeGen)
