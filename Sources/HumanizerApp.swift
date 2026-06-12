@@ -7,10 +7,13 @@ struct HumanizerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        MenuBarExtra("Humanizer", systemImage: "wand.and.stars") {
+        MenuBarExtra {
             MainView()
                 .environmentObject(appState)
                 .frame(width: 440, height: 600)
+        } label: {
+            Image(nsImage: appState.isWorking ? MenuBarIcon.working : MenuBarIcon.normal)
+                .accessibilityLabel("Humanizer")
         }
         .menuBarExtraStyle(.window)
 
