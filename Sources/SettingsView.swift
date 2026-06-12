@@ -15,6 +15,10 @@ struct SettingsView: View {
         }
         .frame(width: 540, height: 440)
         .environmentObject(state)
+        .onAppear {
+            // Menu bar apps open Settings behind other windows — pull it forward.
+            SettingsWindowFocus.bringToFront()
+        }
     }
 }
 

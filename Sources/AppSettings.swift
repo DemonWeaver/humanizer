@@ -31,6 +31,9 @@ final class AppSettings: ObservableObject {
 
     @Published var outputFolderDisplayPath: String
 
+    /// Cached so views don't hit the Keychain on every render.
+    @Published private(set) var hasAPIKey: Bool
+
     init() {
         self.model = defaults.string(forKey: "model") ?? "claude-opus-4-8"
         if let data = defaults.data(forKey: "profiles"),
@@ -40,6 +43,16 @@ final class AppSettings: ObservableObject {
             self.profiles = []
         }
         self.outputFolderDisplayPath = defaults.string(forKey: "outputFolderDisplayPath") ?? ""
+        self.hasAPIKey = KeychainHelper.read()?.isEmpty == false
+
+        // Seed an example profile on first launch so the feature is discoverable.
+        if profiles.isEmpty, !defaults.bool(forKey: "didSeedProfiles") {
+            profiles = [CustomProfile(
+                name: "Casual email",
+                prompt: "This is an email to someone I know. Keep it friendly and direct, contractions are fine, no corporate phrasing, and keep it shorter than the original if possible."
+            )]
+            defaults.set(true, forKey: "didSeedProfiles")
+        }
     }
 
     // MARK: - API key (Keychain)
@@ -52,7 +65,7 @@ final class AppSettings: ObservableObject {
             } else {
                 KeychainHelper.delete()
             }
-            objectWillChange.send()
+            hasAPIKey = newValue?.isEmpty == false
         }
     }
 

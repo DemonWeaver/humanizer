@@ -8,11 +8,14 @@ struct MainView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             header
+            if !state.settings.hasAPIKey {
+                apiKeyBanner
+            }
             inputSection
             actionRow
             outputSection
             if case .failed(let message) = state.phase {
-                Text(message)
+                Label(message, systemImage: "exclamationmark.triangle.fill")
                     .font(.callout)
                     .foregroundStyle(.red)
                     .lineLimit(3)
@@ -36,6 +39,8 @@ struct MainView: View {
         }
     }
 
+    // MARK: - Header
+
     private var header: some View {
         HStack {
             Label("Humanizer", systemImage: "wand.and.stars")
@@ -49,10 +54,8 @@ struct MainView: View {
             }
             .labelsHidden()
             .frame(maxWidth: 150)
-            SettingsLink {
-                Image(systemName: "gearshape")
-            }
-            .buttonStyle(.borderless)
+            .help("Profiles are extra instructions sent with the rewrite — manage them in Settings")
+            settingsButton
             Button {
                 NSApplication.shared.terminate(nil)
             } label: {
@@ -63,19 +66,60 @@ struct MainView: View {
         }
     }
 
+    private var settingsButton: some View {
+        SettingsLink {
+            Image(systemName: "gearshape")
+        }
+        .buttonStyle(.borderless)
+        .help("Settings")
+        // SettingsLink doesn't focus an already-open Settings window in a
+        // menu bar app — force it to the front on every click.
+        .simultaneousGesture(TapGesture().onEnded {
+            SettingsWindowFocus.bringToFront()
+        })
+    }
+
+    private var apiKeyBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "key.fill")
+                .foregroundStyle(.orange)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Add your Anthropic API key to get started")
+                    .font(.callout.weight(.medium))
+                Text("console.anthropic.com → API keys, then paste it in Settings.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            SettingsLink {
+                Text("Open Settings")
+            }
+            .simultaneousGesture(TapGesture().onEnded {
+                SettingsWindowFocus.bringToFront()
+            })
+        }
+        .padding(10)
+        .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+    }
+
+    // MARK: - Input
+
     private var inputSection: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text("Input")
-                    .font(.caption)
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                 if let file = state.sourceFileURL {
-                    Text("· \(file.lastPathComponent)")
+                    Label(file.lastPathComponent, systemImage: "doc.text")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
                 if !state.inputText.isEmpty {
+                    Text(wordCount(state.inputText))
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
                     Button("Clear") { state.reset() }
                         .buttonStyle(.borderless)
                         .font(.caption)
@@ -87,6 +131,10 @@ struct MainView: View {
                 .padding(6)
                 .frame(minHeight: 110, maxHeight: 150)
                 .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color.primary.opacity(0.08))
+                }
                 .overlay(alignment: .topLeading) {
                     if state.inputText.isEmpty {
                         Text("Paste text here, or drop a file anywhere in this window…")
@@ -106,13 +154,16 @@ struct MainView: View {
             } label: {
                 Label("Humanize", systemImage: "wand.and.stars")
             }
+            .buttonStyle(.borderedProminent)
             .keyboardShortcut(.return, modifiers: .command)
             .disabled(state.isWorking || state.inputText.isEmpty)
+            .help("⌘↩")
 
             Button("Humanize Clipboard") {
                 state.humanizeClipboard()
             }
             .disabled(state.isWorking)
+            .help("Grab whatever is on the clipboard and humanize it")
 
             Spacer()
 
@@ -125,17 +176,24 @@ struct MainView: View {
         }
     }
 
+    // MARK: - Output
+
     private var outputSection: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text("Output")
-                    .font(.caption)
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
+                if !state.outputText.isEmpty {
+                    Text(wordCount(state.outputText))
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
                 Spacer()
                 if !state.statusLine.isEmpty {
                     Text(state.statusLine)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(state.statusLine.contains("✓") ? .green : .secondary)
                 }
             }
             TextEditor(text: $state.outputText)
@@ -144,6 +202,19 @@ struct MainView: View {
                 .padding(6)
                 .frame(minHeight: 140, maxHeight: .infinity)
                 .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color.primary.opacity(0.08))
+                }
+                .overlay(alignment: .topLeading) {
+                    if state.outputText.isEmpty && !state.isWorking {
+                        Text("The humanized text appears here and is copied to your clipboard automatically.")
+                            .foregroundStyle(.tertiary)
+                            .padding(.top, 12)
+                            .padding(.leading, 10)
+                            .allowsHitTesting(false)
+                    }
+                }
 
             HStack(spacing: 8) {
                 TextField("Adjust the wording — e.g. “less formal, shorter sentences”", text: $state.feedbackText)
@@ -179,6 +250,13 @@ struct MainView: View {
                 .disabled(state.isWorking || state.outputText.isEmpty)
             }
         }
+    }
+
+    // MARK: - Helpers
+
+    private func wordCount(_ text: String) -> String {
+        let words = text.split { $0.isWhitespace || $0.isNewline }.count
+        return "\(words) word\(words == 1 ? "" : "s")"
     }
 
     private func handleDrop(_ providers: [NSItemProvider]) -> Bool {
