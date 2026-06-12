@@ -12,3 +12,5 @@ Humanizer.xcodeproj/
 # macOS
 .DS_Store
 dist/
+build-release/
+build-diagnostic/

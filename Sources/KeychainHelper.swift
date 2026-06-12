@@ -15,9 +15,13 @@ enum KeychainHelper {
 
     static func save(_ value: String) {
         let data = Data(value.utf8)
+        // Delete then re-add so the item's ACL is (re)established for the
+        // currently-running, signed app. Re-saving from the installed app is
+        // what clears any stale trust list left by earlier/dev builds.
+        SecItemDelete(baseQuery as CFDictionary)
         var query = baseQuery
-        SecItemDelete(query as CFDictionary)
         query[kSecValueData as String] = data
+        query[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlocked
         SecItemAdd(query as CFDictionary, nil)
     }
 
